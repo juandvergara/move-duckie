@@ -29,9 +29,6 @@ class Duckiebot(object):
     # Subscriptions
         self.image_sub = rospy.Subscriber("/duckiebot3/camera_node/image/compressed", CompressedImage, self.cam_duckie)
 
-    # Move duckie
-        self.printVel(0.0, -3.0)
-
     # Setup param
     def setupParam(self, param_name, default_value):
         value = rospy.get_param(param_name, default_value)
@@ -55,6 +52,7 @@ class Duckiebot(object):
 if(__name__ == "__main__"):
     rospy.init_node("duckie_move", anonymous=False)
     duckiebot = Duckiebot()
+    duckiebot.printVel(0.0, -3.0) # Move duckie clockwise
 
     def shutdownhook():
       duckiebot.printVel(0.0, 0.0)
