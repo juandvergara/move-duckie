@@ -25,6 +25,7 @@ class Duckiebot(object):
 
     # Publications
         self.pub_car_cmd = rospy.Publisher("/duckiebot3/car_cmd_switch_node/cmd", Twist2DStamped, queue_size=1)
+        self.image_pub = rospy.Publisher("/output/image_raw/compressed", CompressedImage)
 
     # Subscriptions
         self.image_sub = rospy.Subscriber("/duckiebot3/camera_node/image/compressed", CompressedImage, self.cam_duckie)
@@ -47,12 +48,21 @@ class Duckiebot(object):
         # rospy.logwarn("printing image")
         np_arr = np.frombuffer(image.data, np.uint8)
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        height, width, channels = image_np.shape
+        image_circle = cv2.circle(image_np, (int(height/2), int(width/2)), 10, (0, 0, 255), -1)
+        # Create a compressed msg
+        msg = CompressedImage()
+        msg.header.stamp = rospy.Time.now()
+        msg.format = "jpeg"
+        msg.data = np.array(cv2.imencode('.jpg', image_np)[1]).tostring()
+        # Publish new image
+        self.image_pub.publish(msg)
         # cv2.imshow('Output',image_np)
 
 if(__name__ == "__main__"):
     rospy.init_node("duckie_move", anonymous=False)
     duckiebot = Duckiebot()
-    duckiebot.printVel(0.0, -3.0) # Move duckie clockwise
+    duckiebot.printVel(0.0, 0.0)
 
     def shutdownhook():
       duckiebot.printVel(0.0, 0.0)
